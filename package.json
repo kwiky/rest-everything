@@ -1,0 +1,21 @@
+{
+  "name": "rest-everything",
+  "version": "0.0.1",
+  "author": "Steve Grosbois <steve.grosbois@gmail.com>",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "restify": "*",
+    "mongodb": "*",
+    "save": "*",
+    "save-mongodb": "*"
+  },
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/kwiky/rest-everything.git"
+  },
+  "bugs" : {
+    "url" : "https://github.com/kwiky/rest-everything/issues"
+  }
+}
