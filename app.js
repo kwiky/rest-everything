@@ -6,7 +6,7 @@ var restify = require('restify')
   , auth = require('http-auth')
   , config = require('./config');
 
-var db = new Db('api', new Server(config.database.host, config.database.port, {}));
+var db = new Db('api', new Server(config.database.host, config.database.port), config.database.options);
 var connection = null;
 var server = null;
 

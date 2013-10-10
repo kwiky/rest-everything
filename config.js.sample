@@ -4,7 +4,10 @@ exports.server = {
 
 exports.database = {
 	host:'localhost', 
-	port:27017
+	port:27017,
+	options:{
+		safe:true
+	}
 };
 
 // Comment this part if you want enable all name of resources
