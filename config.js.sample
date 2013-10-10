@@ -1,9 +1,8 @@
-exports.config = {
-	url : 'http://127.0.0.1/',
-	routes : {
-		cars : 'cars.json'
-	},	
-	getRoute : function (id) {
-		return this.url + this.routes[id];
-	}
+exports.server = {
+	port:80
+}
+
+exports.database = {
+	host:'localhost', 
+	port:27017
 };
