@@ -23,7 +23,7 @@ if (config.auth) {
 if (config.resources) {
 	frisby.create('Server should NOT respond to GET resource not enabled')
 	  .get(resourceNotEnabled)
-	  .expectStatus(404)
+	  .expectStatus(403)
 	.toss();
 }
 
@@ -34,35 +34,43 @@ frisby.create('Server should respond to POST')
   .expectJSON(itemSpecimen)
   .afterJSON(function(item) {
   	itemId = item._id;
-	frisby.create('Server should respond to GET all')
+  	frisby.create('Server should respond to GET all')
 	  .get(resource)
 	  .expectStatus(200)
 	  .expectHeaderContains('content-type', 'application/json')
 	  .expectJSONLength('', '> 0')	  
 	  .afterJSON(function(item) {
-		frisby.create('Server should respond to GET one')
-		  .get(resource + '/' + itemId)
+		frisby.create('Server should respond to GET some')
+		  .get(resource + '?item=' + itemSpecimen.item)
 		  .expectStatus(200)
-		  .expectHeaderContains('content-type', 'application/json')  
+		  .expectHeaderContains('content-type', 'application/json')
+		  .expectJSONLength('', '> 0')	  
 		  .afterJSON(function(item) {
-			frisby.create('Server should respond to PUT one')
-			  .put(resource + '/' + itemId, itemSpecimenModified)
+			frisby.create('Server should respond to GET one')
+			  .get(resource + '/' + itemId)
 			  .expectStatus(200)
-			  .expectHeaderContains('content-type', 'application/json')			   
+			  .expectHeaderContains('content-type', 'application/json')  
 			  .afterJSON(function(item) {
-				frisby.create('Server should respond to DELETE one')
-				  .delete(resource + '/' + itemId)
-				  .expectStatus(200)		  		   
-				  .after(function() {
-					frisby.create('Server should respond to DELETE all')
-					  .delete(resource)
-					  .expectStatus(200)
+				frisby.create('Server should respond to PUT one')
+				  .put(resource + '/' + itemId, itemSpecimenModified)
+				  .expectStatus(200)
+				  .expectHeaderContains('content-type', 'application/json')			   
+				  .afterJSON(function(item) {
+					frisby.create('Server should respond to DELETE one')
+					  .delete(resource + '/' + itemId)
+					  .expectStatus(200)		  		   
 					  .after(function() {
-						frisby.create('Server should respond to GET all')
-						  .get(resource)
+						frisby.create('Server should respond to DELETE all')
+						  .delete(resource)
 						  .expectStatus(200)
-						  .expectHeaderContains('content-type', 'application/json')
-						  .expectJSONLength('', 0)
+						  .after(function() {
+							frisby.create('Server should respond to GET all')
+							  .get(resource)
+							  .expectStatus(200)
+							  .expectHeaderContains('content-type', 'application/json')
+							  .expectJSONLength('', 0)
+							.toss();
+						  })
 						.toss();
 					  })
 					.toss();

@@ -21,7 +21,8 @@ db.open(function (error, c) {
 
 		server
 		  .use(restify.fullResponse())
-		  .use(restify.bodyParser());		  
+		  .use(restify.bodyParser())		  
+		  .use(restify.queryParser());
 
 		if (config.auth) {
 			server.use(auth.connect(config.auth));
@@ -31,18 +32,22 @@ db.open(function (error, c) {
 			console.log('%s listening at %s', server.name, server.url);
 		});
 
+		/*server.pre(function(req, res, next) {
+		  console.log(req.originalUrl + ' from ' + req.ip);
+		  return next();
+		});*/
+
 		server.get('/:model', function (req, res, next) {
-		  checkResource(req.params.model, res, function(model, res) {
-			  modelSave = getModelSave(model);
-			  modelSave.find({}, function (error, items) {
+		  checkResource(req.params.model, res, function(modelSave, res) {
+			  delete req.params.model;
+			  modelSave.find(req.query, function (error, items) {
 			    res.send(items);
 			  });
 		  });
 		});
 
 		server.post('/:model', function (req, res, next) {
-		  checkResource(req.params.model, res, function(model, res) {
-			  modelSave = getModelSave(req.params.model);
+		  checkResource(req.params.model, res, function(modelSave, res) {
 			  delete req.params.model; 
 			  modelSave.create(req.params, function (error, item) {
 			    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors))); 
@@ -52,8 +57,7 @@ db.open(function (error, c) {
 		});
 
 		server.get('/:model/:_id', function (req, res, next) {
-		  checkResource(req.params.model, res, function(model, res) {
-			  modelSave = getModelSave(req.params.model);
+		  checkResource(req.params.model, res, function(modelSave, res) {
 			  modelSave.findOne({ _id: req.params._id }, function (error, item) {
 			    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors))); 
 			    if (item) {
@@ -66,8 +70,7 @@ db.open(function (error, c) {
 		});
 
 		server.put('/:model/:_id', function (req, res, next) {
-		  checkResource(req.params.model, res, function(model, res) {	  
-			  modelSave = getModelSave(req.params.model);
+		  checkResource(req.params.model, res, function(modelSave, res) {	
 			  delete req.params.model;
 			  modelSave.update(req.params, function (error, item) {
 			    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors)));
@@ -77,8 +80,7 @@ db.open(function (error, c) {
 		});
 
 		server.del('/:model/:_id', function (req, res, next) {
-		  checkResource(req.params.model, res, function(model, res) {
-			  modelSave = getModelSave(req.params.model);
+		  checkResource(req.params.model, res, function(modelSave, res) {
 			  modelSave.delete(req.params._id, function (error, user) {
 			    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors)));		 
 			    res.send();
@@ -87,9 +89,7 @@ db.open(function (error, c) {
 		});
 
 		server.del('/:model', function (req, res, next) {
-		  checkResource(req.params.model, res, function(model, res) {
-			  modelSave = getModelSave(req.params.model);
-			  delete req.params.model;
+		  checkResource(req.params.model, res, function(modelSave, res) {
 			  modelSave.delete(req.params, function (error, user) {
 			    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors)));		 
 			    res.send();
@@ -104,9 +104,10 @@ db.open(function (error, c) {
 function checkResource(modelName, res, callback) {
 	if (config.resources && config.resources.indexOf(modelName) == -1) {
 		console.log("Resource " + modelName + " not authorized");
-		res.send(404);
+		res.send(403);
 	} else {
-		callback(modelName, res);
+		modelSave = getModelSave(modelName);
+		callback(modelSave, res);
 	}
 }
 
