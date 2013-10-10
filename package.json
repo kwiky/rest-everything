@@ -10,7 +10,8 @@
     "restify": "*",
     "mongodb": "*",
     "save": "*",
-    "save-mongodb": "*"
+    "save-mongodb": "*",
+    "http-auth": "*"
   },
   "devDependencies": {
     "frisby": "*"

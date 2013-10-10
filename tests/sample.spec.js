@@ -1,4 +1,5 @@
 var frisby = require('frisby');
+var config = require('../config');
 
 var testModel = 'tests';
 var host = 'localhost';
@@ -6,7 +7,7 @@ var host = 'localhost';
 var itemSpecimen = {item:"specimen"};
 var itemSpecimenModified = {item:"jasmine"};
 
-var resource = 'http://' + host + '/' + testModel;
+var resource = 'http://test:test@' + host + ':' + config.server.port + '/' + testModel;
 
 frisby.create('Server should respond to POST')
   .post(resource, itemSpecimen)

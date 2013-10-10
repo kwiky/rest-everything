@@ -3,6 +3,7 @@ var restify = require('restify')
   , Server = require('mongodb').Server
   , save = require('save')
   , saveMongodb = require('save-mongodb')
+  , auth = require('http-auth')
   , config = require('./config');
 
 var db = new Db('api', new Server(config.database.host, config.database.port, {}));
@@ -20,7 +21,11 @@ db.open(function (error, c) {
 
 		server
 		  .use(restify.fullResponse())
-		  .use(restify.bodyParser());
+		  .use(restify.bodyParser());		  
+
+		if (config.server.auth) {
+			server.use(auth.connect(config.auth));
+		}
 
 		server.listen(config.server.port, function () {
 			console.log('%s listening at %s', server.name, server.url);
