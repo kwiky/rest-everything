@@ -32,62 +32,83 @@ db.open(function (error, c) {
 		});
 
 		server.get('/:model', function (req, res, next) {
-		  modelSave = getModelSave(req.params.model);
-		  modelSave.find({}, function (error, items) {
-		    res.send(items);
+		  checkResource(req.params.model, res, function(model, res) {
+			  modelSave = getModelSave(model);
+			  modelSave.find({}, function (error, items) {
+			    res.send(items);
+			  });
 		  });
 		});
 
 		server.post('/:model', function (req, res, next) {
-		  modelSave = getModelSave(req.params.model);
-		  delete req.params.model; 
-		  modelSave.create(req.params, function (error, item) {
-		    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors))); 
-		    res.send(201, item);
+		  checkResource(req.params.model, res, function(model, res) {
+			  modelSave = getModelSave(req.params.model);
+			  delete req.params.model; 
+			  modelSave.create(req.params, function (error, item) {
+			    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors))); 
+			    res.send(201, item);
+			  });
 		  });
 		});
 
 		server.get('/:model/:_id', function (req, res, next) {
-		  modelSave = getModelSave(req.params.model);
-		  modelSave.findOne({ _id: req.params._id }, function (error, item) {
-		    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors))); 
-		    if (item) {
-		      res.send(item);
-		    } else {
-		      res.send(404);
-		    }
+		  checkResource(req.params.model, res, function(model, res) {
+			  modelSave = getModelSave(req.params.model);
+			  modelSave.findOne({ _id: req.params._id }, function (error, item) {
+			    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors))); 
+			    if (item) {
+			      res.send(item);
+			    } else {
+			      res.send(404);
+			    }
+			  });
 		  });
 		});
 
-		server.put('/:model/:_id', function (req, res, next) {		  
-		  modelSave = getModelSave(req.params.model);
-		  delete req.params.model;
-		  modelSave.update(req.params, function (error, item) {
-		    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors)));
-		    res.send(item);
+		server.put('/:model/:_id', function (req, res, next) {
+		  checkResource(req.params.model, res, function(model, res) {	  
+			  modelSave = getModelSave(req.params.model);
+			  delete req.params.model;
+			  modelSave.update(req.params, function (error, item) {
+			    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors)));
+			    res.send(item);
+			  });
 		  });
 		});
 
 		server.del('/:model/:_id', function (req, res, next) {
-		  modelSave = getModelSave(req.params.model);
-		  modelSave.delete(req.params._id, function (error, user) {
-		    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors)));		 
-		    res.send();
+		  checkResource(req.params.model, res, function(model, res) {
+			  modelSave = getModelSave(req.params.model);
+			  modelSave.delete(req.params._id, function (error, user) {
+			    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors)));		 
+			    res.send();
+			  });
 		  });
 		});
 
 		server.del('/:model', function (req, res, next) {
-		  modelSave = getModelSave(req.params.model);
-		  delete req.params.model;
-		  modelSave.delete(req.params, function (error, user) {
-		    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors)));		 
-		    res.send();
+		  checkResource(req.params.model, res, function(model, res) {
+			  modelSave = getModelSave(req.params.model);
+			  delete req.params.model;
+			  modelSave.delete(req.params, function (error, user) {
+			    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors)));		 
+			    res.send();
+			  });
 		  });
 		});
 	} else {
 		console.log(error);
 	}
 });
+
+function checkResource(modelName, res, callback) {
+	if (config.resources && config.resources.indexOf(modelName) == -1) {
+		console.log("Resource " + modelName + " not authorized");
+		res.send(404);
+	} else {
+		callback(modelName, res);
+	}
+}
 
 function getModelSave(model) {
 	if (modelsSave[model] == null) {

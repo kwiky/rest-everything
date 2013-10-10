@@ -7,7 +7,15 @@ exports.database = {
 	port:27017
 };
 
-// if server.auth is true
+// Comment this part if you want enable all name of resources
+exports.resources = [
+	'tests',
+	'patates',
+	'choux'
+];
+
+// Comment this part if you don't want authentication 
+// For other authentication mode, please check https://github.com/gevorg/http-auth 
 exports.auth = require('http-auth').basic({
     realm: "Protected area.",
     file: __dirname + "/users.htpasswd" // gevorg:gpass, Sarah:testpass ...

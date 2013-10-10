@@ -9,6 +9,7 @@ var itemSpecimenModified = {item:"jasmine-modified"};
 
 var resource = 'http://' + host + ':' + config.server.port + '/' + testModel;
 var resourceAuth = 'http://test:test@' + host + ':' + config.server.port + '/' + testModel;
+var resourceNotEnabled = 'http://test:test@' + host + ':' + config.server.port + '/resourceNotEnabled';
 
 if (config.auth) {
 	frisby.create('Server should NOT respond to GET all without auth')
@@ -17,6 +18,13 @@ if (config.auth) {
 	.toss();
 
 	resource = resourceAuth;
+}
+
+if (config.resources) {
+	frisby.create('Server should NOT respond to GET resource not enabled')
+	  .get(resourceNotEnabled)
+	  .expectStatus(404)
+	.toss();
 }
 
 frisby.create('Server should respond to POST')
