@@ -23,7 +23,7 @@ db.open(function (error, c) {
 		  .use(restify.fullResponse())
 		  .use(restify.bodyParser());		  
 
-		if (config.server.auth) {
+		if (config.auth) {
 			server.use(auth.connect(config.auth));
 		}
 

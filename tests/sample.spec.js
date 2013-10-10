@@ -4,10 +4,20 @@ var config = require('../config');
 var testModel = 'tests';
 var host = 'localhost';
 
-var itemSpecimen = {item:"specimen"};
-var itemSpecimenModified = {item:"jasmine"};
+var itemSpecimen = {item:"jasmine"};
+var itemSpecimenModified = {item:"jasmine-modified"};
 
-var resource = 'http://test:test@' + host + ':' + config.server.port + '/' + testModel;
+var resource = 'http://' + host + ':' + config.server.port + '/' + testModel;
+var resourceAuth = 'http://test:test@' + host + ':' + config.server.port + '/' + testModel;
+
+if (config.auth) {
+	frisby.create('Server should NOT respond to GET all without auth')
+	  .get(resource)
+	  .expectStatus(401)
+	.toss();
+
+	resource = resourceAuth;
+}
 
 frisby.create('Server should respond to POST')
   .post(resource, itemSpecimen)
