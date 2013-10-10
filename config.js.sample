@@ -1,8 +1,15 @@
 exports.server = {
-	port:80
+	port:80,
+	auth:true
 }
 
 exports.database = {
 	host:'localhost', 
 	port:27017
 };
+
+// if server.auth is true
+exports.auth = require('http-auth').basic({
+    realm: "Protected area.",
+    file: __dirname + "/users.htpasswd" // gevorg:gpass, Sarah:testpass ...
+});
