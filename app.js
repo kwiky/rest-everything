@@ -2,9 +2,10 @@ var restify = require('restify')
   , Db = require('mongodb').Db
   , Server = require('mongodb').Server
   , save = require('save')
-  , saveMongodb = require('save-mongodb');
+  , saveMongodb = require('save-mongodb')
+  , config = require('./config');
 
-var db = new Db('api', new Server('localhost', 27017, {}));
+var db = new Db('api', new Server(config.database.host, config.database.port, {}));
 var connection = null;
 var server = null;
 
@@ -21,7 +22,7 @@ db.open(function (error, c) {
 		  .use(restify.fullResponse())
 		  .use(restify.bodyParser());
 
-		server.listen(80, function () {
+		server.listen(config.server.port, function () {
 			console.log('%s listening at %s', server.name, server.url);
 		});
 
@@ -69,6 +70,15 @@ db.open(function (error, c) {
 		    res.send();
 		  });
 		});
+
+		server.del('/:model', function (req, res, next) {
+		  modelSave = getModelSave(req.params.model);
+		  delete req.params.model;
+		  modelSave.delete(req.params, function (error, user) {
+		    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors)));		 
+		    res.send();
+		  });
+		});
 	} else {
 		console.log(error);
 	}
@@ -81,8 +91,8 @@ function getModelSave(model) {
 			// Create a save object and pass in a mongodb engine.
 			modelsSave[model] = save(model, { engine: saveMongodb(collection) });
 			// Create the collection
-			modelsSave[model].create({"item":"specimen"}, function(error, item) {
-				modelsSave[model].deleteMany({"item":"specimen"}, function(error, item) {
+			modelsSave[model].create({item:"specimen"}, function(error, item) {
+				modelsSave[model].deleteMany({item:"specimen"}, function(error, item) {
 					console.log("Collection created");
 				});
 			});

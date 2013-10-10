@@ -2,3 +2,4 @@ node_modules
 *~
 .bowerrc
 *.bat
+config.js
