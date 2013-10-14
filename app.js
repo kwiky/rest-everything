@@ -6,7 +6,7 @@ var restify = require('restify')
   , auth = require('http-auth')
   , config = require('./config');
 
-var db = new Db('api', new Server(config.database.host, config.database.port), config.database.options);
+var db = new Db(config.database.databaseName, new Server(config.database.host, config.database.port), config.database.options);
 var connection = null;
 var server = null;
 
@@ -15,91 +15,99 @@ var modelsSave = [];
 // Open your mongodb database.
 db.open(function (error, c) {
 	if (error == null) {
-		console.log("MongoDb is connected");
-		connection = c;
-		server = restify.createServer({name: 'api'});
+		// Authenticate
+		dbAuthenticate(config.database, function(err, result) {
+			console.log("MongoDb is connected");
+			connection = c;
+			server = restify.createServer({name: 'api'});
 
-		server
-		  .use(restify.fullResponse())
-		  .use(restify.bodyParser())		  
-		  .use(restify.queryParser());
+			server
+			  .use(restify.fullResponse())
+			  .use(restify.bodyParser())		  
+			  .use(restify.queryParser());
 
-		if (config.auth) {
-			server.use(auth.connect(config.auth));
-		}
+			if (config.auth) {
+				server.use(auth.connect(config.auth));
+			}
 
-		server.listen(config.server.port, function () {
-			console.log('%s listening at %s', server.name, server.url);
-		});
+			server.listen(config.server.port, function () {
+				console.log('%s listening at %s', server.name, server.url);
+			});
 
-		/*server.pre(function(req, res, next) {
-		  console.log(req.originalUrl + ' from ' + req.ip);
-		  return next();
-		});*/
-
-		server.get('/:model', function (req, res, next) {
-		  checkResource(req.params.model, res, function(modelSave, res) {
-			  delete req.params.model;
-			  modelSave.find(req.query, function (error, items) {
-			    res.send(items);
+			server.get('/:model', function (req, res, next) {
+			  checkResource(req.params.model, res, function(modelSave, res) {
+				  delete req.params.model;
+				  modelSave.find(req.query, function (error, items) {
+				    res.send(items);
+				  });
 			  });
-		  });
-		});
+			});
 
-		server.post('/:model', function (req, res, next) {
-		  checkResource(req.params.model, res, function(modelSave, res) {
-			  delete req.params.model; 
-			  modelSave.create(req.params, function (error, item) {
-			    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors))); 
-			    res.send(201, item);
+			server.post('/:model', function (req, res, next) {
+			  checkResource(req.params.model, res, function(modelSave, res) {
+				  delete req.params.model; 
+				  modelSave.create(req.params, function (error, item) {
+				    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors))); 
+				    res.send(201, item);
+				  });
 			  });
-		  });
-		});
+			});
 
-		server.get('/:model/:_id', function (req, res, next) {
-		  checkResource(req.params.model, res, function(modelSave, res) {
-			  modelSave.findOne({ _id: req.params._id }, function (error, item) {
-			    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors))); 
-			    if (item) {
-			      res.send(item);
-			    } else {
-			      res.send(404);
-			    }
+			server.get('/:model/:_id', function (req, res, next) {
+			  checkResource(req.params.model, res, function(modelSave, res) {
+				  modelSave.findOne({ _id: req.params._id }, function (error, item) {
+				    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors))); 
+				    if (item) {
+				      res.send(item);
+				    } else {
+				      res.send(404);
+				    }
+				  });
 			  });
-		  });
-		});
+			});
 
-		server.put('/:model/:_id', function (req, res, next) {
-		  checkResource(req.params.model, res, function(modelSave, res) {	
-			  delete req.params.model;
-			  modelSave.update(req.params, function (error, item) {
-			    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors)));
-			    res.send(item);
+			server.put('/:model/:_id', function (req, res, next) {
+			  checkResource(req.params.model, res, function(modelSave, res) {	
+				  delete req.params.model;
+				  modelSave.update(req.params, function (error, item) {
+				    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors)));
+				    res.send(item);
+				  });
 			  });
-		  });
-		});
+			});
 
-		server.del('/:model/:_id', function (req, res, next) {
-		  checkResource(req.params.model, res, function(modelSave, res) {
-			  modelSave.delete(req.params._id, function (error, user) {
-			    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors)));		 
-			    res.send();
+			server.del('/:model/:_id', function (req, res, next) {
+			  checkResource(req.params.model, res, function(modelSave, res) {
+				  modelSave.delete(req.params._id, function (error, user) {
+				    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors)));		 
+				    res.send();
+				  });
 			  });
-		  });
-		});
+			});
 
-		server.del('/:model', function (req, res, next) {
-		  checkResource(req.params.model, res, function(modelSave, res) {
-			  modelSave.delete(req.params, function (error, user) {
-			    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors)));		 
-			    res.send();
+			server.del('/:model', function (req, res, next) {
+			  checkResource(req.params.model, res, function(modelSave, res) {
+				  modelSave.delete(req.params, function (error, user) {
+				    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors)));		 
+				    res.send();
+				  });
 			  });
-		  });
+			});
 		});
 	} else {
 		console.log(error);
 	}
 });
+
+function dbAuthenticate(configDatabase, callback) {
+	if (configDatabase.user) {
+		db.authenticate(configDatabase.user, configDatabase.password, function(err, result) {
+			callback(err, result);
+		});
+	} else {
+		callback();
+	}
+}
 
 function checkResource(modelName, res, callback) {
 	if (config.resources && config.resources.indexOf(modelName) == -1) {

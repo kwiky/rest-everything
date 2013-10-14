@@ -1,10 +1,14 @@
 exports.server = {
-	port:80
+	port:80,
+	name:"sample-app"
 }
 
 exports.database = {
 	host:'localhost', 
 	port:27017,
+	user:"dbUser",
+	password:"dbPassword",
+	databaseName:"dbName",
 	options:{
 		safe:true
 	}
