@@ -1,29 +1,34 @@
 exports.server = {
+	host:'127.0.0.1',
 	port:80,
-	name:"sample-app"
+	name:"rest-everything"
 }
 
 exports.database = {
 	host:'localhost', 
 	port:27017,
-	user:"dbUser",
-	password:"dbPassword",
-	databaseName:"dbName",
+	//user:"dbUser",
+	//password:"dbPassword",
+	databaseName:"rest-everything",
 	options:{
 		safe:true
 	}
 };
 
 // Comment this part if you want enable all name of resources
-exports.resources = [
-	'tests',
-	'patates',
-	'choux'
-];
+/*
+	exports.resources = [
+		'tests',
+		'patates',
+		'choux'
+	];
+*/
 
 // Comment this part if you don't want authentication 
 // For other authentication mode, please check https://github.com/gevorg/http-auth 
-exports.auth = require('http-auth').basic({
-    realm: "Protected area.",
-    file: __dirname + "/users.htpasswd" // gevorg:gpass, Sarah:testpass ...
-});
+/*
+	exports.auth = require('http-auth').basic({
+	    realm: "Protected area.",
+	    file: __dirname + "/users.htpasswd" // gevorg:gpass, Sarah:testpass ...
+	});
+*/

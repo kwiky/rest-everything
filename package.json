@@ -1,6 +1,6 @@
 {
   "name": "rest-everything",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "Steve Grosbois <steve.grosbois@gmail.com>",
   "scripts": {
     "start": "node app.js",
